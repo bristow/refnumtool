@@ -10,6 +10,32 @@ Bienvenue dans la doc de refnumtool!
 :Date: |today| 
 :Revision: |version|
 
+Présentation
+^^^^^^^^^^^^
+
+Le module vise à faciliter la vie des référents numériques: d'un côté ils
+disposent de bases de données (identifiants, quotas, profs principaux), de
+l'autre ils doivent diffuser des informations à qui de droit.
+
+Il s'agit donc de publiposter les bonnes informations (identifiant, mdp élève,
+quotas) aux profs principaux.
+
+Sécurité
+^^^^^^^^
+
+Est-il judicieux de choisir une diffusion par mail? C'est clairement un point
+de fragilité quant à la sécurité des données. Toutefois, ici on diffuse au
+travers du smtp sécurisé du rectorat: les messages restent à l'intérieur des
+machines académiques et sont délivrés directement dans les boîtes
+académiques. A priori, à aucun moment, les messages ne vont transiter sur
+d'autres serveurs.
+
+Par ailleurs, la connexion smtp est sécurisée (transaction SSL). Donc la
+sécurité des données peut-être considérée comme garantie.
+
+Il faut juste veiller (évidemment…) à choisir les adresses académiques des PP
+pour la diffusion.
+
 Contents:
 
 .. toctree::

@@ -7,14 +7,15 @@ from odf.opendocument import OpenDocumentText
 from odf.draw import Image, Frame
 from odf.text import P, Span, Tab, List, ListItem
 from odf.table import Table, TableColumn, TableRow, TableCell
-
 from odf.style import Style, GraphicProperties, TextProperties, ParagraphProperties, TableColumnProperties
 from odf.style import PresentationPageLayout, MasterPage, PageLayout, PageLayoutProperties, Header, HeaderStyle, HeaderFooterProperties
 from odf.style import TabStops, TabStop, FooterStyle, Footer
 
 from tkinter.filedialog import askopenfilename
 from zipfile import ZipFile
-from os.path import basename, dirname, join, isdir
+from os.path import basename, dirname, join, isdir, expanduser
+
+from yaml import load, dump
 
 class _ODFPY_Document_Generic(object):
     """Example of Document
@@ -181,6 +182,15 @@ class parentId(_ODFPY_Document_Template):
         h.addElement(p)
         mp.addElement(h)
         self.document.masterstyles.addElement(mp)
+        
+        #import des textes de la page odt tuteur
+        try:
+            from yaml import CLoader as Loader
+        except ImportError:
+            from yaml import Loader
+        home = expanduser("~/.refnumtool.d")
+        with open(join(home,"text_extract_tuteur.yaml")) as file:
+            self.msg = load(file, Loader=Loader)
 
         if not(maj):
             file = open(path, "r", encoding="utf8")
@@ -204,12 +214,10 @@ class parentId(_ODFPY_Document_Template):
 
     def make_parent_id(self, dict):
         """cree la page texte à partir des champs csv
-        
+        le texte est lu dans home/.refnumtool.d/text_extract_tuteur.yaml
+
         :param dict: dictionnaire des champs du tuteur issus du csv (elycee)
         """
-        #global base
-        global annonce
-        global actions
         self.addParagraph("Remise Identifiant ENT: Responsable", "heading1")
         table_content = [["Responsable", "Élève", "Classe"],\
                          [dict["nom"]+" "+dict["prenom"],\
@@ -221,26 +229,22 @@ class parentId(_ODFPY_Document_Template):
                          {"numbercolumnsrepeated": 1, "stylename": "column2"},
                          {"numbercolumnsrepeated": 1, "stylename": "column3"}
                      ])
-
         self.addParagraph("", "normal")
-
-        self.addParagraph(annonce[0], "normal")
-        self.addParagraph(annonce[1], "normal")
-        self.addParagraph(annonce[2], "normal")
+        self.addParagraph(self.msg["annonce"][0], "normal")
+        self.addParagraph(self.msg["annonce"][1], "normal")
+        self.addParagraph(self.msg["annonce"][2], "normal")
+        self.addParagraph(self.msg["annonce"][3], "normal")
         stylename = getattr(self, "gras", None)
         p = P(stylename=stylename, text="votre identifiant: "+dict["login"])
-        p.addElement(Tab())
+        #p.addElement(Tab())
         q = P(stylename=stylename, text="mot de passe provisoire: "+dict["mot de passe"])    
         self.document.text.addElement(p)
         self.document.text.addElement(q)
+        self.addParagraph("", "normal")
+        self.addParagraph(self.msg["annonce"][4], "normal")
+        self.addList(self.msg["actions"], "normal")
+        self.addParagraph(self.msg["annonce"][5], "normal")
 
-        #self.addParagraph("", "normal")
-        self.addParagraph(annonce[3], "normal")
-        self.addList(actions, "normal")
-        self.addParagraph(annonce[4], "normal")
-
-        #debug
-        #print(dict["nom enfant"]+" "+dict["prenom enfant"] + " OK")
 
 class classeId(_ODFPY_Document_Template):
     """générateur d'une sortie odt pour les élèves d'une classe
@@ -267,34 +271,14 @@ class classeId(_ODFPY_Document_Template):
             L.addElement(self.make_eleve_id(d))
         self.document.text.addElement(L)
         file.close()
-
         self.save(join(base, "ENT_id_Eleve_"+self.classe+".odt"))            
-
 
     def make_eleve_id(self, dict):
         mdp = dict["mot de passe"]
-        L = dict["nom"]+" "+dict["prenom"]+" :\t\t "+dict["login"]+" -- "+(mdp if len(mdp)<=8 else "mdp déjà utilisé")
+        L = dict["nom"]+" "+dict["prenom"]+" :\t\t "+dict["login"]+" -- "+\
+            (mdp if len(mdp)<=8 else "mdp déjà utilisé")
         stylename = getattr(self, "normal", None)
         p = P(stylename=stylename, text=L)
         i = ListItem()
         i.addElement(p)
         return i
-
-
-annonce = ["""Madame, Monsieur, le lycée Jacques Brel utilise désormais un ENT
-(environnement numérique de travail) commun aux lycées de l'académie. Cet
-environnement est le point d'accès unique aux ressources numériques du lycée :
-cahier de texte de l'élève, notes, messagerie vers les enseignants …
-
-Vous avez accès à l'ENT via le site du lycée :""",
-"http://lyc-jacques-brel.elycee.rhonealpes.fr/",
-"""
-Cliquer sur : se connecter en tant que « parent »
-""",
-           """À l'issue de la 1ere connexion, vous devrez """,
-           """L'accès aux notes se fait dans l'onglet « Pronote »."""]
-
-actions = ["valider l'acceptation de la charte informatique de l'ENT", 
-           "personnaliser votre mot de passe",
-           "renseigner une adresse mail de notification (important en cas de perte/oubli du mot de passe)"]
-

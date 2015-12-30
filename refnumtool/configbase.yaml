@@ -1,0 +1,9 @@
+default_to: boris@bebop
+dir: null
+initialdir: null
+port: 587
+smtp: smtps.ac-lyon.fr
+sender: adr-valide@ac-lyon.fr
+test: true
+sig: Le référent numérique
+login: login_valide

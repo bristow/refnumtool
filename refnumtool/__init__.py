@@ -1,11 +1,13 @@
 import tkinter as tk
-import shelve
 import os
-#from os.path import exists
-from refnumtool.mailing_pp import Mailing
+from os.path import basename, dirname, join, isdir, exists, expanduser
+from yaml import load, dump
+from shutil import copyfile
+
+from refnumtool.mailing import Mailing
 from refnumtool.id2odt import *
 
-class refnumTool():
+class refnumTool(tk.Frame):
     """classe principale de gestion pour référent numérique
     interface en ligne de commande par choix simple
     Vous devez avoir:
@@ -18,77 +20,91 @@ class refnumTool():
     2. génération d'un document .odt des identifiants ENT pour les tuteurs sur
        une mise à jour, envoi des identifiants élèves aux PP.
     3. génération globale des identifiants ENT tuteurs et élèves par classe
-       puis envoi des id élèves aux PP.
-    4. quitter
+    4. envoi général des id élèves aux PP.
+    5. quitter
 
     """
     
-    def __init__(self):
-        self.options = {'1': self._quota, '2': self._idnew,\
-                        '3': self._idgen, '4': self._exit}
-        if os.path.exists("config_refnum"):
-            with shelve.open('config_refnum') as db:
-                self.config = db['config']
-        else:
-            self.config = dict()
+    def __init__(self, master=None):
+        tk.Frame.__init__(self, master)
+        self.grid() 
+
+        try:
+            from yaml import CLoader as Loader
+        except ImportError:
+            from yaml import Loader
+
+        # paramètres généraux
+        home = expanduser("~/.refnumtool.d")
+        confpath = join(home,"config.yaml") 
+        if not(exists(confpath)):
+            # .. todo:: améliorer la recherche du modèle de config
+            copyfile("refnumtool/configbase.yaml", confpath) 
+
+        with open(confpath,"r") as conf_file:
+            self.config = load(conf_file, Loader=Loader)
+
+        txttuteurpath = join(home, "text_extract_tuteur.yaml")
+        if not(exists(txttuteurpath)):
+            copyfile("refnumtool/text_extract_tuteur.yaml", txttuteurpath)
 
         print("chargement du fichier des professeurs principaux")    
-        self.mailing  = Mailing()
+        self.mailing  = Mailing(self.config)
+        self.options = {'1': self._quota, '2': self._idnew,\
+                        '3': self.mailing.admin_idgen, '4': self._idgen,
+                        '5': self._exit}
+
         self.__call__()
         
     def __call__(self):
-        choix = ["1: envoi des overquotas aux pp",\
-                 "2: génération d'un .odt tuteurs, envoi des nouveaux id ENT aux pp",\
-                 "3: génération et envoi de tous les id ENT", "4: quitter"]
+        choix = ["1: envoi des overquotas aux pp",
+                 "2: génération d'un .odt tuteurs, envoi des nouveaux id ENT aux pp",
+                 "3: génération de tous les id ENT par classe",
+                 "4: envoi des id élèves aux PP",
+                 "5: quitter"]
         
         print(*choix, sep='\n')
-        IN = input("choisir 1,2,3,4 :")
-        while IN not in "1234":
-            IN = input("choisir 1,2,3,4 :")
+        IN = input("choisir 1,2,3,4,5 :")
+        while IN not in "12345":
+            IN = input("choisir 1,2,3,4,5 :")
         self.options[IN]()
 
     def _quota(self):
         self.mailing.admin_quota()
-        # pp = [self.mailing.PPscribe[e] for e in self.mailing.PPscribe if "over"\
-        #       in self.mailing.PPscribe[e]]
-        pp = [v for v in self.mailing.PPscribe.values() if "over" in v]
+        pp = [v for v in self.mailing.PP.values() if "over" in v]
         print(len(pp), " profs à contacter")
         a = input("poursuivre?(o/n) ")
         if a == 'o':
-            self.mailing.mailing("quota", **self.mailing.sending_param)
+            self.mailing.mailing("quota")
         else:
+            self.mailing._save_config()
             self.__call__()
-
+            
     def _idnew(self):
         self.mailing.admin_idnew()
         #générer un .odt des identifiants Tuteur.
-        tuteurs = parentId(self.mailing.pathid, maj=True, data=self.mailing.PPelycee)
+        tuteurs = parentId(self.mailing.pathid, maj=True, data=self.mailing.PP)
         print("fichier des nouveaux identifiants généré pour "+str(self.mailing.nbtu)+" tuteurs")
         
-        pp = [self.mailing.PPelycee[e] for e in self.mailing.PPelycee if "Eleve"\
-              in self.mailing.PPelycee[e]]
+        pp = [self.mailing.PP[e] for e in self.mailing.PP if "Eleve"\
+              in self.mailing.PP[e]]
         print(len(pp), " profs à contacter")
         a = input("poursuivre?(o/n) ")
         if a == 'o':
-            self.mailing.mailing("idnew", **self.mailing.sending_param)
+            self.mailing.mailing("idnew")
         else:
+            self.mailing._save_config()
             self.__call__()
 
     def _idgen(self):
-        a = input("régénérer les id?(o/n)")
-        if a=='o':
-            self.mailing.admin_idgen()
-        else: 
-            self.mailing._set_iddirectory("dossier des identifiants")
-            self.mailing._set_prof("elycee")
+        self.mailing._set_iddirectory("dossier des identifiants")
+        self.mailing._set_prof("elycee")
         a = input("envoyer les id à tous les PP?(o/n) ")
         if a == 'o':
-            self.mailing.mailing("idgen", **self.mailing.sending_param)
+            self.mailing.mailing("idgen")
         else:
-            exit()
+            self.mailing._save_config()
+            self.__call__()
 
     def _exit(self):
         exit()
-
-
-        

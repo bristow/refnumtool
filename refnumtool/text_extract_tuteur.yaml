@@ -1,0 +1,18 @@
+# extraits du texte des pages pour sortie odt des identifiants tuteurs.
+# chaque entrée définit un nouveau paragraphe (et donc permet un retour à la ligne)
+# mettre entre " quand il y a : dans la ligne (au risque de créer un dictionnaire.
+annonce: 
+  - |
+    Madame, Monsieur, le lycée Jacques Brel utilise désormais un ENT
+    (environnement numérique de travail) commun aux lycées de l'académie. Cet
+    environnement est le point d'accès unique aux ressources numériques du lycée :
+    cahier de texte de l'élève, notes, messagerie vers les enseignants …
+  - "Vous avez accès à l'ENT via le site du lycée:"
+  - http://lyc-jacques-brel.elycee.rhonealpes.fr/
+  - "Cliquer sur : se connecter en tant que « parent »"
+  - À l'issue de la 1ere connexion, vous devrez
+  - L'accès aux notes se fait dans l'onglet « Pronote »
+actions: 
+  - valider l'acceptation de la charte informatique de l'ENT
+  - personnaliser votre mot de passe
+  - renseigner une adresse mail de notification (important en cas de perte/oubli du mot de passe)
