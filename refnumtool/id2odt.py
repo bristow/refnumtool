@@ -16,7 +16,7 @@ from tkinter.filedialog import askopenfilename
 from zipfile import ZipFile
 from os.path import basename, dirname, join, isdir
 
-class ODFPY_Document_Generic(object):
+class _ODFPY_Document_Generic(object):
     """Example of Document
     """
 
@@ -92,7 +92,7 @@ class ODFPY_Document_Generic(object):
         self.document.save(filename)
 
 
-class ODFPY_Document_Template(ODFPY_Document_Generic):
+class _ODFPY_Document_Template(_ODFPY_Document_Generic):
     """Example of document
     """
 
@@ -144,16 +144,32 @@ class ODFPY_Document_Template(ODFPY_Document_Generic):
         self.addTableColumnStyle("column2", "Center Column", properties={"columnwidth": "4cm"})
         self.addTableColumnStyle("column3", "Right Column", properties={"columnwidth": "2cm"})
 
-class parentId(ODFPY_Document_Template):
+class parentId(_ODFPY_Document_Template):
+    """générateur de sortie odt pour les tuteurs.
+    Format A5, un tuteur par page.
+    """
+
     def __init__(self, path, maj=False, data=None):
         """initialisation d'un générateur odt pour les tuteurs.
-        path: str chemin vers le fichier des csv tuteurs
-        maj: boolean mode màj ou complet
-        data: dict, si maj=True, il doit contenir le dictionnaire des pp et
-            tuteurs
+        
+        En haut de chaque page A5 en sortie, il créée un tableau
+
+        +----------------+-----------+--------+
+        |  Responsable   | Élève     | Classe |
+        +================+===========+========+
+        |  nom resp      | nom eleve | cl     |
+        +----------------+-----------+--------+
+
+        :param str path: chemin vers le fichier des csv tuteurs
+        :param boolean maj:  mode màj ou complet
+        :param dict data: si maj=True, il doit contenir le dictionnaire des pp
+            et tuteurs
+
         """
         self.nom = basename(path)[:-4] #nom du fichier sans extension
         base = dirname(path)
+        #fallacieux en cas de màj.
+        # .. todo:: vérifier utilité et effacer
         self.classe = ((self.nom).split('Tuteur_'))[-1] #vraiment lié au nom de fichier
         self.document = OpenDocumentText()
         self.defineStyles()
@@ -187,7 +203,9 @@ class parentId(ODFPY_Document_Template):
 
 
     def make_parent_id(self, dict):
-        """cree le fichier d'incident à partir des champs csv
+        """cree la page texte à partir des champs csv
+        
+        :param dict: dictionnaire des champs du tuteur issus du csv (elycee)
         """
         #global base
         global annonce
@@ -196,7 +214,7 @@ class parentId(ODFPY_Document_Template):
         table_content = [["Responsable", "Élève", "Classe"],\
                          [dict["nom"]+" "+dict["prenom"],\
                          dict["nom enfant"]+ " " + dict["prenom enfant"],\
-                         dict["classe"]]]
+                         dict["classe"]]] # self.classe
         self.addTable(table_content, "tablecontents", 
                      [
                          {"numbercolumnsrepeated": 1, "stylename": "column1"},
@@ -224,11 +242,15 @@ class parentId(ODFPY_Document_Template):
         #debug
         #print(dict["nom enfant"]+" "+dict["prenom enfant"] + " OK")
 
-class classeId(ODFPY_Document_Template):
+class classeId(_ODFPY_Document_Template):
+    """générateur d'une sortie odt pour les élèves d'une classe
+    """
+
     def __init__(self, path):
         self.nom = basename(path)[:-4] #nom du fichier sans extension
         base = dirname(path)
-        self.classe = ((self.nom).split('Eleve_'))[-1] #vraiment lié au nom de fichier
+        #vraiment lié au nom de fichier
+        self.classe = ((self.nom).split('Eleve_'))[-1] 
         self.document = OpenDocumentText()
         self.defineStyles()
         # pas de header complet, on reste en A4
