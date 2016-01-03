@@ -12,6 +12,7 @@ from yaml import load, dump
 from shutil import copyfile
 
 from refnumtool.id_extractor import Extractor
+import refnumtool.parametre as param
 
 import ssl
 import smtplib
@@ -43,25 +44,14 @@ class Mailing():
         home = expanduser("~/.refnumtool.d")
         # texte des quotas
         confquota = join(home,"textquota.yaml") 
-        if not(exists(confquota)):
-            # .. todo:: améliorer la recherche du modèle de txtquota
-            copyfile("refnumtool/textquota.yaml", confquota) 
         with open(confquota,"r") as conf_file:
             self.textquota = load(conf_file, Loader=Loader)
-
         # texte des newid
         confidnew = join(home,"textidnew.yaml") 
-        if not(exists(confidnew)):
-            # .. todo:: améliorer la recherche du modèle de txtquota
-            copyfile("refnumtool/textidnew.yaml", confidnew) 
         with open(confidnew,"r") as conf_file:
             self.textidnew = load(conf_file, Loader=Loader)
-
         # texte des idgen
         confidgen = join(home,"textidgen.yaml") 
-        if not(exists(confidgen)):
-            # .. todo:: améliorer la recherche du modèle de txtquota
-            copyfile("refnumtool/textidgen.yaml", confidgen) 
         with open(confidgen,"r") as conf_file:
             self.textidgen = load(conf_file, Loader=Loader)
 
@@ -211,21 +201,22 @@ class Mailing():
 
         """
 
-        smtprelay = ('localhost' if self.config["test"] else self.config["smtp"])
-        s = (smtplib.SMTP(smtprelay) if (self.config["test"] or (self.config["port"] not in [465, 587]))\
-             else smtplib.SMTP(smtprelay, port=self.config["port"]))
-        # s = smtplib.SMTP(smtprelay, port=self.config["port"])
-        #smtplib.SMTP_SSL(smtprelay, port=self.config["port"]))
+        cfg = self.config
+        smtprelay = ('localhost' if cfg["test"] else cfg["smtp"])
+        s = (smtplib.SMTP(smtprelay) if (cfg["test"] or (cfg["port"] not in [465, 587]))\
+             else smtplib.SMTP(smtprelay, port=cfg["port"]))
+        # s = smtplib.SMTP(smtprelay, port=cfg["port"])
+        #smtplib.SMTP_SSL(smtprelay, port=cfg["port"]))
         #login et mdp
         #en clair mais que pour qq secondes sur un écran et pas sur le réseau.
-        if not(self.config["test"]) and self.config["port"] in [465, 587]:
-            if "login" not in self.config:
-                self.config["loging"] = input("Entrez votre login sur le serveur "+\
-                              self.config["smtp"]+": ")
+        if not(cfg["test"]) and cfg["port"] in [465, 587]:
+            if "login" not in cfg:
+                cfg["loging"] = input("Entrez votre login sur le serveur "+\
+                              cfg["smtp"]+": ")
             pwd = input("pwd (en clair, dsl) :")
             context = ssl.create_default_context()
             s.starttls(context=context)
-            s.login(self.config["login"], pwd)
+            s.login(cfg["login"], pwd)
 
         LOG = open(self.logfile, "w")
         if cible == "quota":
@@ -238,12 +229,12 @@ class Mailing():
                 for x in E["over"]:
                     msg+= x+"\n"
                 msg += self.textquota[2]
-                msg += self.config["sig"]
+                msg += cfg["sig"]
                 M = MIMEText(msg, _charset='utf-8')
                 M['Subject'] = str(n)+' dépassement'+("s" if n>=2 else "") +\
                                " de quota en "+E["scribe"]
-                M['From'] = self.config["sender"]
-                M['To'] = (self.config["default_to"] if self.config["test"] else E["E-mail"])
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
                 try:
                     COUNT += 1
                     s.send_message(M)
@@ -270,13 +261,13 @@ class Mailing():
                 for x in E["Eleve"]:
                     msg+= x["nom"]+ " " +x["prenom"]+ " : "+x["login"] +" -- "+x["mot de passe"]+"\n"
                 msg += self.textidnew[2]
-                msg += self.config["sig"]
+                msg += cfg["sig"]
 
                 M = MIMEText(msg, _charset='utf-8')
                 M['Subject'] = str(n)+' élève'+("s" if n>=2 else "") +\
                                " en "+E["elycee"]
-                M['From'] = self.config["sender"]
-                M['To'] = (self.config["default_to"] if self.config["test"] else E["E-mail"])
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
                 #encoders.encode_base64(tmp)
                 try:
                     COUNTPP += 1
@@ -298,11 +289,11 @@ class Mailing():
             for E in pp:
                 msg=self.textidgen[0]+E["elycee"]+".\n"
                 msg += self.textidgen[1]
-                msg += self.config["sig"]
+                msg += cfg["sig"]
                 M = MIMEMultipart()
                 M['Subject'] = "liste des comptes élève en "+E["elycee"]
-                M['From'] = self.config["sender"]
-                M['To'] = (self.config["default_to"] if self.config["test"] else E["E-mail"])
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
                 M.attach(MIMEText(msg, 'plain', _charset='utf-8'))
                 #ajouter la pj liée au pp, le nom du fichier doit être:
                 F = join(pathid, "ENT_id_Eleve_"+E["elycee"]+".odt")

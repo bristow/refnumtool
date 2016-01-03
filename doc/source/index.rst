@@ -9,13 +9,15 @@ Bienvenue dans la doc de refnumtool!
 :Author: Boris Mauricette <Boris point Mauricette at ac - lyon point fr> ou <teddy_boomer at yahoo point fr>
 :Date: |today| 
 :Revision: |version|
+:page Github: https://github.com/TeddyBoomer/refnumtool
+:Téléchargement: https://github.com/TeddyBoomer/refnumtool/releases
 
 Présentation
 ^^^^^^^^^^^^
 
 Le module vise à faciliter la vie des référents numériques: d'un côté ils
 disposent de bases de données (identifiants, quotas, profs principaux), de
-l'autre ils doivent diffuser des informations à qui de droit.
+l'autre ils doivent diffuser des informations aux profs principaux.
 
 Il s'agit donc de publiposter les bonnes informations (identifiant, mdp élève,
 quotas) aux profs principaux.
@@ -36,7 +38,8 @@ sécurité des données peut-être considérée comme garantie.
 Il faut juste veiller (évidemment…) à choisir les adresses académiques des PP
 pour la diffusion.
 
-Contents:
+Table des matières:
+^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2

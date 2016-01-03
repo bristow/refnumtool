@@ -78,10 +78,11 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        'refnumtool':['data/doc/html/*.html',\
-                      'data/doc/html/_images/*',\
-                      'data/doc/html/_modules/*.html',\
-                      'data/doc/html/_sources/*','data/doc/html/_static/*',\
+        'refnumtool':['data/doc/html/*.html',
+                      'data/doc/html/*.js',
+                      'data/doc/html/_images/*',
+                      'data/doc/html/_modules/*.html',
+                      'data/doc/html/_sources/*','data/doc/html/_static/*',
                       'data/doc/html/_modules/refnumtool/*']
     },
     scripts = ['scripts/run_refnumtool.sh','scripts/run_refnumtool.bat'],

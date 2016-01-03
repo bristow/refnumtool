@@ -27,6 +27,13 @@ Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
 d'une liaison possible à d'autres bibliothèques (plus rapides)… pas
 d'inquiétude.
 
+Documentation
+^^^^^^^^^^^^^
+
+Cette documentation se trouve dans le dossier *data* du module (à
+chercher dans le dossier de votre python par ex. C:\Python34 ou
+/usr/local/lib/python3.4/dist-packages)
+
 Config et 1er lancement
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -39,7 +46,7 @@ recherche des fichiers csv est conservé dans ce fichier de configuration; c'est
 bien pratique! Il contient aussi l'expéditeur par défaut, le port et le nom du
 relais smtp (par défaut smtps.ac-lyon.fr en 587, connexion sécurisée)
 
-.. warning:: Par défaut, le fichier *config.yaml* contient un paramètre test:
+.. important:: Par défaut, le fichier *config.yaml* contient un paramètre test:
              true pour des raisons de sécurité et de développement. Ainsi on
              peut lancer l'application sans crainte de publiposter n'importe
              quoi. Les mails sont alors envoyé au *default_to* (avec
