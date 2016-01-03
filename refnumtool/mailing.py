@@ -29,6 +29,11 @@ from email.mime.application import MIMEApplication
 class Mailing():
     """Objet pour diffusion aux profs principaux.
     L'initialisation demande de choisir un fichier csv des PP.
+
+    self.PP: dict des données prof, clé: nom de classe elycee, valeur: dictionnaire des champs profs
+    chaque dictionnaire valeur acquiert une clé supplémentaire "Eleve" ou "Tuteur" contentant la liste
+    des dico des nouveaux élèves ou tuteurs.
+
     """
     def __init__(self, param=dict()):
         try:
@@ -61,7 +66,7 @@ class Mailing():
                                         filetypes=[("CSV", "*.csv")])
         self._update_config(("initialdir", dirname(self.pathprof)))
         self.logfile = join(dirname(self.pathprof), "log_refnumtool"+\
-                            time.strftime("%H-%M-%S-%d-%m-%Y")+".log")
+                            time.strftime("%d%m%Y-%H-%M-%S")+".log")
         self.PP = dict()
 
     def _update_config(self, pair):
@@ -87,19 +92,14 @@ class Mailing():
         """
         #nom de l'entrée csv
         ext = (choix if choix=="elycee" else "scribe")
-        # remplissage profs pour elycee
+        # remplissage profs
         fprof=open(self.pathprof, encoding="utf8")
         dialect=csv.Sniffer().sniff(fprof.readline())
         fprof.seek(0) # se remettre en début de fichier, le sniff a lu 1 ligne
         reader = csv.DictReader(fprof, dialect=dialect)
-        if choix=="elycee":
-            for e in reader:
-                if e[ext]:
-                    self.PP[e[ext]] = e
-        elif choix=="quota":
-            for e in reader:
-                if e[ext]:
-                    self.PP[e[ext]] = e
+        for e in reader:
+            if e[ext]:
+                self.PP[e[ext]] = e
         fprof.close()
 
     def admin_quota(self):
@@ -123,7 +123,7 @@ class Mailing():
         reader = csv.DictReader(quota, dialect=dialect)
         self.nbel = 0 #nb élèves
         for e in reader:
-            a = GET_ELEVE.search(e["Utilisateur "])
+            a = GET_ELEVE.search(e["Utilisateur"])
             if a and "over" in self.PP[a.group(2)]:
                 (self.PP[a.group(2)]["over"]).append(a.group(1))
                 self.nbel += 1 #nb élèves
@@ -199,6 +199,7 @@ class Mailing():
         :param port: port value for the relay 587 for secured transaction.
         :type port: int
 
+
         """
 
         cfg = self.config
@@ -248,7 +249,7 @@ class Mailing():
             print(self.nbel, " élèves détectés")
             print(str(COUNT)+" profs contactés")
         elif cible == "idnew":
-            # .. todo: et les nouveaux tuteurs?
+            pathid = dirname(self.pathid)
             # filtrer seulement les élèves pour les pp?
             pp = [v for v in self.PP.values() if "Eleve" in v]
             COUNT = 0
@@ -268,19 +269,59 @@ class Mailing():
                                " en "+E["elycee"]
                 M['From'] = cfg["sender"]
                 M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
-                #encoders.encode_base64(tmp)
                 try:
                     COUNTPP += 1
                     s.send_message(M)
-                    print("1 msg à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
+                    print("1 msg (élèves) à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
                           file=LOG)
                 except: # catch all exceptions
                     print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +\
                           M['To'], file=LOG)
             print(COUNT, "nouveaux élèves", file=LOG)
-            print(str(COUNTPP)+" profs contactés", file=LOG)
+            print(str(COUNTPP)+" profs contactés (élèves)", file=LOG)
             print(COUNT, "nouveaux élèves")
-            print(str(COUNTPP)+" profs contactés")
+            print(str(COUNTPP)+" profs contactés (élèves)")
+
+            pptu = [v for v in self.PP.values() if "Tuteur" in v]
+            COUNT = 0
+            COUNTPP = 0
+            for E in pp:
+                # fichier odt
+                F = join(pathid, "ENT_id_Tuteur_"+E["elycee"]+"_"+time.strftime("%d%m%Y")+".odt")
+                n = len(E["Tuteur"]) # nb nv tuteurs
+                COUNT += n
+                msg = self.textidnew[0]+E["elycee"]+".\n"
+                msg += self.textidnew[3]
+                msg += "\n"+cfg["sig"]
+                M = MIMEMultipart()
+                M['Subject'] = str(n)+' tuteur'+("s" if n>=2 else "") +\
+                               " en "+E["elycee"]
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
+                M.attach(MIMEText(msg, 'plain', _charset='utf-8'))                
+                #open and join a file
+                ctype = (mimetypes.guess_type(basename(F)))[0]
+                maintype, subtype = ctype.split('/', 1)
+                with open(F, 'rb') as f:
+                    p = MIMEBase(maintype, subtype)
+                    p.set_payload(f.read())
+                    encoders.encode_base64(p)
+                    p.add_header('Content-Disposition', 'attachment',
+                                 filename=basename(F))
+                    M.attach(p)
+                try:
+                    COUNTPP += 1
+                    s.send_message(M)
+                    print("1 msg (tuteurs) à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
+                          file=LOG)
+                except: # catch all exceptions
+                    print("Erreur (tuteurs): "+E["Nom"]+" " +E["Prénom"]+ " - " +\
+                          M['To'], file=LOG)
+            print(COUNT, "nouveaux tuteurs", file=LOG)
+            print(str(COUNTPP)+" profs contactés (tuteurs)", file=LOG)
+            print(COUNT, "nouveaux tuteurs")
+            print(str(COUNTPP)+" profs contactés (tuteurs)")
+
 
         elif cible == "idgen":
             pathid = self.pathid
@@ -319,5 +360,6 @@ class Mailing():
             print(str(COUNT)+" profs contactés", file=LOG)
             print(str(COUNT)+" profs contactés")
         LOG.close()
+        self.config = cfg
         s.quit()
         self._save_config()

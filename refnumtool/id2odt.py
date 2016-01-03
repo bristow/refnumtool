@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import csv
+import time
 import os
 from odf.opendocument import OpenDocumentText
 from odf.draw import Image, Frame
@@ -202,13 +203,12 @@ class parentId(_ODFPY_Document_Template):
                 self.make_parent_id(d)
             file.close()
             self.save(join(base, "ENT_id_Tuteur_"+self.classe+".odt")) 
-        else:
-            for pp in data.values():
-                if "Tuteur" in pp: 
-                    for d in pp["Tuteur"]:
-                        self.make_parent_id(d)
-            #TODO: ajouter la date dans le nom de sortie
-            self.save(join(base, "ENT_id_Tuteur_new.odt")) 
+        else: # cas d'une màj
+            #for pp in data.values(): # superflu, génération par classe pour les tuteurs
+            if "Tuteur" in data:  # test superflu en principe
+                for d in data["Tuteur"]:
+                    self.make_parent_id(d)
+            self.save(join(base, "ENT_id_Tuteur_"+data["elycee"]+"_"+time.strftime("%d%m%Y")+".odt")) 
                    
 
 

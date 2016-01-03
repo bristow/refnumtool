@@ -17,11 +17,11 @@ Il s'agit donc d'installer d'abord les dépendances puis l'archive wheel .whl
 
 Pour windows::
 
-  py -3 -m pip install odfpy pyyaml \chemin\vers\refnumtool-0.1-py3-none-any.whl
+  py -3 -m pip install odfpy pyyaml \chemin\vers\refnumtool-xxx-py3-none-any.whl
 
 Pour linux::
 
-  sudo pip3 install odfpy pyyaml /chemin/vers/refnumtool-0.1-py3-none-any.whl
+  sudo pip3 install odfpy pyyaml /chemin/vers/refnumtool-xxx-py3-none-any.whl
 
 Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
 d'une liaison possible à d'autres bibliothèques (plus rapides)… pas
@@ -90,11 +90,11 @@ Le logiciel est conçu pour manipuler des données au format CSV (peu importe le
 
 * Fichier des quotas: à partir de la page web de l'EAD scribe, on copie/colle
   le tableau dans un tableur et on sauve en .csv.  Attention, c'est le champ
-  *Utilisateur* qui est analysé; et lors du collage, il y a un espace dans le
-  nom: c'est bien *"Utilisateur "*
+  *Utilisateur* qui est analysé.
 
 Log
 ^^^
 
 un fichier de log des mails envoyés est créé dans le même dossier que le
-fichier des profs.
+fichier des profs. La date et l'heure du publipostage apparaissent dans le
+nom du fichier du type *nom_%d%m%Y-%H-%M-%S.log*

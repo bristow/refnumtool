@@ -25,8 +25,8 @@ class refnumTool(tk.Frame):
     * un csv des identifiants ENT (général ou juste une màj)
     
     1. envoi de messages aux profs principaux pour les dépassements de quota
-    2. génération d'un document .odt des identifiants ENT pour les tuteurs sur
-       une mise à jour, envoi des identifiants élèves aux PP.
+    2. génération d'un document .odt par classe des identifiants ENT pour les
+       tuteurs sur une mise à jour, envoi des identifiants élèves aux PP.
     3. génération globale des identifiants ENT tuteurs et élèves par classe
     4. envoi général des id élèves aux PP.
     5. quitter
@@ -119,13 +119,16 @@ class refnumTool(tk.Frame):
             
     def _idnew(self):
         self.mailing.admin_idnew()
-        #générer un .odt des identifiants Tuteur.
-        tuteurs = parentId(self.mailing.pathid, maj=True, data=self.mailing.PP)
-        print("fichier des nouveaux identifiants généré pour "+str(self.mailing.nbtu)+" tuteurs")
+        #générer un .odt des identifiants Tuteur.    
+        pp = [e for e in self.mailing.PP.values() if "Eleve" in e]
+        pptu = [e for e in self.mailing.PP.values() if "Tuteur" in e]
         
-        pp = [self.mailing.PP[e] for e in self.mailing.PP if "Eleve"\
-              in self.mailing.PP[e]]
-        print(len(pp), " profs à contacter")
+        for prof in pptu:
+            tuteurs = parentId(self.mailing.pathid, maj=True, data=prof)
+        print("fichiers des nouveaux identifiants généré pour "+str(self.mailing.nbtu)+" tuteurs")
+
+        print(len(pp), " profs à contacter pour élèves")
+        print(len(pptu), " profs à contacter pour tuteurs")
         a = input("poursuivre?(o/n) ")
         if a == 'o':
             self.mailing.mailing("idnew")

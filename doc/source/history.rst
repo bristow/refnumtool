@@ -1,6 +1,10 @@
 Historique
 ==========
 
+
+* 0.3: factorisation du code
+  envoi des id tuteurs même pour les màj base ENT.
+  nom du fichier de log plus simple.
 * 0.2: paramétrages externalisés en yaml
   gestion des risques d'erreur et mise en place d'un fichier de log.
   bug fixes divers.

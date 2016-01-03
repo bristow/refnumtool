@@ -18,7 +18,6 @@ les enseignants …""",
 
 config ={
 "default_to": "boris@bebop",
-"dir": "",
 "initialdir": "",
 "port": 587,
 "smtp": "smtps.ac-lyon.fr",
@@ -28,20 +27,21 @@ config ={
 "login": "login_valide"}
 
 # liste des phrases dans un message pour quotas
-txtquota =["Cher collègue, tu es prof principal de la ",
+txtquota =["Bonjour, tu es prof principal de la ",
            "Les élèves suivants sont en dépassement de quota sur le réseau pédagogique:\n",
 """Merci de leur indiquer d'effacer leurs fichiers superflus, puis de bien faire
 *vider la corbeille* même si elle semble vide.
 Bien cordialement,"""]
 
 # lignes de texte pour envoi d'identifiant de nouveaux élèves.
-txtidnew= ["Cher collègue, tu es prof principal de la ",
+txtidnew= ["Bonjour, tu es prof principal de la ",
            "Les nouveaux élèves suivants sont arrivés dans ta classe:\n",
 """Merci de leur transmettre leur identifiant + mot de passe (ENT). 
-Bien cordialement,"""]
+Bien cordialement,""",
+           "Voici les identifiants des nouveaux tuteurs dans ta classe.\nBien cordialemnt,"]
 
 # lignes de texte du message pour diffusion générale des id et mdp
-txtidgen = ["Cher collègue, tu es prof principal de la ",
+txtidgen = ["Bonjour, tu es prof principal de la ",
 """Voici la liste des identifiants et mot de passe provisoire de tes élèves
 en pièce jointe
 Bien cordialement,"""]
