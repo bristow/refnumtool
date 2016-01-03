@@ -17,11 +17,11 @@ Il s'agit donc d'installer d'abord les dépendances puis l'archive wheel .whl
 
 Pour windows::
 
-  py -3 -m pip install odfpy pyyaml \chemin\vers\refnumtool-0.1-py3-none-any.whl
+  py -3 -m pip install odfpy pyyaml \chemin\vers\refnumtool-xxx-py3-none-any.whl
 
 Pour linux::
 
-  sudo pip3 install odfpy pyyaml /chemin/vers/refnumtool-0.1-py3-none-any.whl
+  sudo pip3 install odfpy pyyaml /chemin/vers/refnumtool-xxx-py3-none-any.whl
 
 Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
 d'une liaison possible à d'autres bibliothèques (plus rapides)… pas

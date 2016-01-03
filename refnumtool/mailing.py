@@ -319,5 +319,6 @@ class Mailing():
             print(str(COUNT)+" profs contactés", file=LOG)
             print(str(COUNT)+" profs contactés")
         LOG.close()
+        self.config = cfg
         s.quit()
         self._save_config()

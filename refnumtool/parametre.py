@@ -18,7 +18,6 @@ les enseignants …""",
 
 config ={
 "default_to": "boris@bebop",
-"dir": "",
 "initialdir": "",
 "port": 587,
 "smtp": "smtps.ac-lyon.fr",
