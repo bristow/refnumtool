@@ -48,8 +48,20 @@ Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
 d'une liaison possible à d'autres bibliothèques (plus rapides)… pas
 d'inquiétude.
 
+Lancement
+=========
+
+En ligne de commande depuis n'impote où::
+
+  run_refnumtool.bat
+  run_refnumtool.sh
+
+dans les deux cas on lance simplement le module, ce qui correspond à::
+
+  python3 -m refnumtool
+
 Documentation
-^^^^^^^^^^^^^
+=============
 
 La documentation se trouve dans le dossier *data* du module (à
 chercher dans le dossier de votre python par ex. C:\Python34 ou
