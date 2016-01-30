@@ -46,7 +46,8 @@ class Extractor():
             elif nl["profil"]=="Tuteur":
                 CLASSES[nl["classe"]]["tu"].append(nl)
 
-        del CLASSES['']
+        if '' in CLASSES:# ne pas tenir compte des comptes sans classe
+            del CLASSES['']
         CL = list(CLASSES.keys())
         CL.sort() # trier les classes
 
@@ -76,10 +77,11 @@ class Extractor():
                       sep=";", file = OUTcsv1)
             OUTcsv1.close()
 
-            for nl in TU:
-                print(*[nl["nom"],nl["prenom"],nl["login"], nl["mot de passe"],\
-                        nl["nom enfant"], nl["prenom enfant"], nl["classe"]],\
-                      sep=";", file = OUTcsv2)
+            for nl in TU: # on filtre les tuteurs qui n'ont pas encore utilisé l'ENT
+                if ">>>" not in nl["mot de passe"]:
+                    print(*[nl["nom"],nl["prenom"],nl["login"], nl["mot de passe"],\
+                            nl["nom enfant"], nl["prenom enfant"], nl["classe"]],\
+                          sep=";", file = OUTcsv2)
             OUTcsv2.close()
 
             print("total: "+str(COUNT)+ " élèves", file=OUT)

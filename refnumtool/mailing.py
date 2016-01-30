@@ -183,7 +183,7 @@ class Mailing():
         """fonction de mailing aux profs principaux
         les paramètres sont lus dans self.config importé de refnumtool.
 
-        :param cible: in ["quota", "idgen", "idnew"]
+        :param cible: in ["quota", "idgen", "idnew", "idgentu"]
         :type cible: str
         :param test: indique si on simule le mailing auquel cas, l'adresse de\
         sortie est default_to
@@ -285,7 +285,7 @@ class Mailing():
             pptu = [v for v in self.PP.values() if "Tuteur" in v]
             COUNT = 0
             COUNTPP = 0
-            for E in pp:
+            for E in pptu:
                 # fichier odt
                 F = join(pathid, "ENT_id_Tuteur_"+E["elycee"]+"_"+time.strftime("%d%m%Y")+".odt")
                 n = len(E["Tuteur"]) # nb nv tuteurs
@@ -322,7 +322,6 @@ class Mailing():
             print(COUNT, "nouveaux tuteurs")
             print(str(COUNTPP)+" profs contactés (tuteurs)")
 
-
         elif cible == "idgen":
             pathid = self.pathid
             pp = [self.PP[e] for e in self.PP]
@@ -338,6 +337,45 @@ class Mailing():
                 M.attach(MIMEText(msg, 'plain', _charset='utf-8'))
                 #ajouter la pj liée au pp, le nom du fichier doit être:
                 F = join(pathid, "ENT_id_Eleve_"+E["elycee"]+".odt")
+                #open and join a file
+                ctype = (mimetypes.guess_type(basename(F)))[0]
+                maintype, subtype = ctype.split('/', 1)
+
+                try:
+                    with open(F, 'rb') as f:
+                        # creation du message
+                        p = MIMEBase(maintype, subtype)
+                        p.set_payload(f.read())
+                        encoders.encode_base64(p)
+                        p.add_header('Content-Disposition', 'attachment',
+                                     filename=basename(F))
+                        M.attach(p)
+
+                    COUNT += 1
+                    s.send_message(M)
+                    print("1 msg+pj à "+E["Nom"]+" " +E["Prénom"]+ " - " +E["elycee"]+" - "+ M['To'],
+                          file=LOG)
+                except: # catch all exceptions
+                    print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +E["elycee"]+ " - " +\
+                          M['To'], file=LOG)
+            print(str(COUNT)+" profs contactés (id élèves)", file=LOG)
+            print(str(COUNT)+" profs contactés (id élèves)")
+
+        elif cible == "idgentu":
+            pathid = self.pathid
+            pp = [self.PP[e] for e in self.PP]
+            COUNT = 0
+            for E in pp:
+                msg=self.textidgen[0]+E["elycee"]+".\n"
+                msg += self.textidgen[2]
+                msg += cfg["sig"]
+                M = MIMEMultipart()
+                M['Subject'] = "fichier des comptes tuteurs en "+E["elycee"]
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
+                M.attach(MIMEText(msg, 'plain', _charset='utf-8'))
+                #ajouter la pj liée au pp, le nom du fichier doit être:
+                F = join(pathid, "ENT_id_Tuteur_"+E["elycee"]+".odt")
                 #open and join a file
                 ctype = (mimetypes.guess_type(basename(F)))[0]
                 maintype, subtype = ctype.split('/', 1)
@@ -357,8 +395,9 @@ class Mailing():
                 except: # catch all exceptions
                     print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +\
                           M['To'], file=LOG)
-            print(str(COUNT)+" profs contactés", file=LOG)
-            print(str(COUNT)+" profs contactés")
+            print(str(COUNT)+" profs contactés (id tuteurs)", file=LOG)
+            print(str(COUNT)+" profs contactés (id tuteurs)")
+
         LOG.close()
         self.config = cfg
         s.quit()

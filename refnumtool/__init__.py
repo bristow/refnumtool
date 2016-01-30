@@ -28,8 +28,10 @@ class refnumTool(tk.Frame):
     2. génération d'un document .odt par classe des identifiants ENT pour les
        tuteurs sur une mise à jour, envoi des identifiants élèves aux PP.
     3. génération globale des identifiants ENT tuteurs et élèves par classe
+       les comptes tuteurs déjà utilisés sont expurgés
     4. envoi général des id élèves aux PP.
-    5. quitter
+    5. envoi général des id tuteurs aux PP.
+    6. quitter
 
     """
     global Dumper
@@ -77,7 +79,7 @@ class refnumTool(tk.Frame):
         self.mailing  = Mailing(self.config)
         self.options = {'1': self._quota, '2': self._idnew,\
                         '3': self.mailing.admin_idgen, '4': self._idgen,
-                        '5': self._exit}
+                        '5': self._idgentu, '6': self._exit}
 
         self.__call__()
         
@@ -86,12 +88,13 @@ class refnumTool(tk.Frame):
                  "2: génération d'un .odt tuteurs, envoi des nouveaux id ENT aux pp",
                  "3: génération de tous les id ENT par classe",
                  "4: envoi des id élèves aux PP",
-                 "5: quitter"]
+                 "5: envoi des id tuteurs aux PP",
+                 "6: quitter"]
         
         print(*choix, sep='\n')
-        IN = input("choisir 1,2,3,4,5 :")
-        while IN not in "12345":
-            IN = input("choisir 1,2,3,4,5 :")
+        IN = input("choisir 1,2,3,4,5,6 :")
+        while IN not in "123456":
+            IN = input("choisir 1,2,3,4,5,6 :")
         self.options[IN]()
 
     def init_config(self, val, path):
@@ -139,9 +142,19 @@ class refnumTool(tk.Frame):
     def _idgen(self):
         self.mailing._set_iddirectory("dossier des identifiants")
         self.mailing._set_prof("elycee")
-        a = input("envoyer les id à tous les PP?(o/n) ")
+        a = input("envoyer les id élèves à tous les PP?(o/n) ")
         if a == 'o':
             self.mailing.mailing("idgen")
+        else:
+            self.mailing._save_config()
+            self.__call__()
+
+    def _idgentu(self):
+        self.mailing._set_iddirectory("dossier des identifiants")
+        self.mailing._set_prof("elycee")
+        a = input("envoyer les id tuteurs à tous les PP?(o/n) ")
+        if a == 'o':
+            self.mailing.mailing("idgentu")
         else:
             self.mailing._save_config()
             self.__call__()

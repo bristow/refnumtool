@@ -19,7 +19,7 @@ Le module vise à faciliter la vie des référents numériques: d'un côté ils
 disposent de bases de données (identifiants, quotas, profs principaux), de
 l'autre ils doivent diffuser des informations aux profs principaux.
 
-Il s'agit donc de publiposter les bonnes informations (identifiant, mdp élève,
+Il s'agit donc de publiposter les bonnes informations (identifiants, mdp,
 quotas) aux profs principaux.
 
 Sécurité
