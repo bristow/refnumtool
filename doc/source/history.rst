@@ -1,7 +1,7 @@
 Historique
 ==========
 
-
+* 0.4: ajout d'un envoi global des identifiants tuteurs aux profs principaux.
 * 0.3: factorisation du code
   envoi des id tuteurs même pour les màj base ENT.
   nom du fichier de log plus simple.

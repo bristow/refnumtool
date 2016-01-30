@@ -43,7 +43,10 @@ Bien cordialement,""",
 # lignes de texte du message pour diffusion générale des id et mdp
 txtidgen = ["Bonjour, tu es prof principal de la ",
 """Voici la liste des identifiants et mot de passe provisoire de tes élèves
-en pièce jointe
+en pièce jointe.
+Bien cordialement,""",
+"""Voici le fichier des identifiants et mot de passe provisoire des responsables
+en pièce jointe.
 Bien cordialement,"""]
 
 
