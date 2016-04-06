@@ -285,7 +285,7 @@ class Mailing():
             pptu = [v for v in self.PP.values() if "Tuteur" in v]
             COUNT = 0
             COUNTPP = 0
-            for E in pp:
+            for E in pptu:
                 # fichier odt
                 F = join(pathid, "ENT_id_Tuteur_"+E["elycee"]+"_"+time.strftime("%d%m%Y")+".odt")
                 n = len(E["Tuteur"]) # nb nv tuteurs
