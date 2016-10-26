@@ -340,21 +340,23 @@ class Mailing():
                 #open and join a file
                 ctype = (mimetypes.guess_type(basename(F)))[0]
                 maintype, subtype = ctype.split('/', 1)
-            
-                with open(F, 'rb') as f:
-                    p = MIMEBase(maintype, subtype)
-                    p.set_payload(f.read())
-                    encoders.encode_base64(p)
-                    p.add_header('Content-Disposition', 'attachment',
-                                 filename=basename(F))
-                    M.attach(p)
+
                 try:
+                    with open(F, 'rb') as f:
+                        # creation du message
+                        p = MIMEBase(maintype, subtype)
+                        p.set_payload(f.read())
+                        encoders.encode_base64(p)
+                        p.add_header('Content-Disposition', 'attachment',
+                                     filename=basename(F))
+                        M.attach(p)
+
                     COUNT += 1
                     s.send_message(M)
-                    print("1 msg+pj à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
+                    print("1 msg+pj à "+E["Nom"]+" " +E["Prénom"]+ " - " +E["elycee"]+" - "+ M['To'],
                           file=LOG)
                 except: # catch all exceptions
-                    print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +\
+                    print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +E["elycee"]+ " - " +\
                           M['To'], file=LOG)
             print(str(COUNT)+" profs contactés (id élèves)", file=LOG)
             print(str(COUNT)+" profs contactés (id élèves)")
