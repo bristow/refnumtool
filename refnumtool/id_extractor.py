@@ -99,3 +99,87 @@ class Extractor():
             print(c + ": export ODT tu,el OK")
             del D
             del E
+
+
+class ExtractorAtos():
+    """Décomposer le CSV global Atos des identifiants par classe
+    """
+    def __init__(self, path):
+        """extracteur des identifiants Atos
+        Format des entrées 
+        Eleve;Corentin;LAGNEAU;corentin.lagneau;SIO2;cL18/01/1996
+
+        :param path: chemin du fichier csv des identifiants Atos
+        :type path: str
+        """
+        
+        file=open(path, "r", encoding="utf-16")
+        #dialect=csv.Sniffer().sniff(file.readline())
+        #file.seek(0) # se remettre en début de fichier, le sniff a lu 1 ligne
+        #reader = csv.DictReader(file, dialect=dialect)
+        # préfixe pour le chemin en sortie
+        pre = join(dirname(path),"identifiantsAtos")
+
+        if not(isdir(pre)):
+            mkdir(pre)
+
+        consignes ="""Identifiants et mot de passe initiaux des élèves par classe
+        sur le réseau pédagogique.
+        identifiant du type prenom.nom
+        mot de passe du type pNjj/mm/aaa
+        Demande de réinitialisation du mot de passe: formulaire sur l'ENT"""
+        
+        CLASSES = dict()
+        for i,nl in enumerate(file):
+            # OBJET regroupant les élèves par classe
+            # Atos change parfois de séparateur! 2016 ; 2017,
+            # initialisation du séparateur de champ
+            if i==0:
+                sep = (";" if ";" in nl else ",")
+            profil,prenom,nom,login,classe,mdp = nl.split(sep)
+            if classe not in CLASSES:
+                CLASSES[classe] = ({nom+prenom:nl} if profil=="Eleve" else dict())
+            elif profil=="Eleve":
+                CLASSES[classe][nom+prenom] = nl
+            else:
+                pass # on ne fait rien sur les profils PersEducNat
+
+        if '' in CLASSES:# ne pas tenir compte des comptes sans classe
+            del CLASSES['']
+        CL = list(CLASSES.keys())
+        CL.sort() # trier les classes
+
+        OUT = open(join(pre,"Atos_eleves_complet.txt"), "w")
+        ## dd/mm/yyyy format
+        print(time.strftime("%d/%m/%Y"), file=OUT)
+        print("liste des classes: ", CL, file=OUT)
+        print(consignes, file=OUT)
+
+        for c in CL:
+            POOL = CLASSES[c]
+            print("classe "+c, file=OUT)
+            OUTcsv1 = open(join(pre,"Atos_id_Eleve_"+c+".csv"), "w")
+            COUNT = 0
+            print("profil;nom;prenom;login;classe;mot de passe", file=OUTcsv1)
+
+            EL = sorted(list(CLASSES[c].keys())) # ordre lexico par défaut
+
+            for name in EL: # name est ici de la forme nomprenom
+                COUNT +=1
+                # la ligne de l'élève contient aussi le LFCR qu'on enlève.
+                print(POOL[name][:-1], sep="\t", file = OUT)
+                print(POOL[name][:-1], file = OUTcsv1)
+            OUTcsv1.close()
+
+            print("total: "+str(COUNT)+ " élèves", file=OUT)
+            print("\n\n", file=OUT)
+            print(c, "eleves OK")
+        print(str(len(CL))+" classes traitées")
+
+        OUT.close()
+        # peut-être à réactiver: liste des login en .odt
+        # for c in CL:
+        #     el = join(pre,"Atos_id_Eleve_"+c+".csv")
+        #     E = classeId(el)
+        #     print(c + ": export ODT el OK")
+        #     del E

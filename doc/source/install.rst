@@ -1,5 +1,5 @@
-Installation et fichiers de configuration
-=========================================
+Installation, lancement et fichiers de configuration
+====================================================
 
 Python
 ^^^^^^
@@ -26,6 +26,24 @@ Pour linux::
 Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
 d'une liaison possible à d'autres bibliothèques (plus rapides)… pas
 d'inquiétude.
+
+Lancement
+^^^^^^^^^
+
+L'utilitaire se lance en *ligne de commande*:
+
+Pour windows::
+
+  run_refnumtool.bat
+
+Pour linux::
+
+  run_refnumtool.sh    
+
+Dans les deux cas on lance simplement le module, ce qui correspond à::
+
+  python3 -m refnumtool
+
 
 Documentation
 ^^^^^^^^^^^^^
@@ -84,13 +102,28 @@ Le logiciel est conçu pour manipuler des données au format CSV (peu importe le
   de bases; en effet, si vous n'avez pas de chance, pronote, sts, elycee et
   scribe ne vont pas avoir le même nommage des classes.
 
-* Fichiers des identifiants: export complet depuis elycee pour génération
+  Si votre établissement est passé en mise à niveau Atos, vous n'avez plus de
+  serveur scribe; les identifiants réseau pédagogique sont synchronisés de
+  façon hebdomadaire avec la base SIECLE rectorale. Vous pouvez récupérer le
+  csv des nouveaux identifiants dans le partage réseau des Référents. Mais à
+  nouveau, les noms de classe peuvent être différents de ceux de elycee; il
+  faut placer un champs atos:
+
+  +-----+--------+--------+--------+------+
+  | Nom | Prénom | E-Mail | elycee | atos |
+  +-----+--------+--------+--------+------+
+
+  On ajuste les noms de classe exacts dans cette colonne.
+  
+* [elycee] Fichiers des identifiants: export complet depuis elycee pour génération
   globale par classe (tuteurs et élèves), export d'un fichier de mise à jour
   des nouveaux identifiants sinon.
 
-* Fichier des quotas: à partir de la page web de l'EAD scribe, on copie/colle
+* [scribe] Fichier des quotas: à partir de la page web de l'EAD scribe, on copie/colle
   le tableau dans un tableur et on sauve en .csv.  Attention, c'est le champ
   *Utilisateur* qui est analysé.
+
+* [atos] Fichier des identifiants. Pas de ligne d'entête. Séparateur de champs ";" en 2016, "," en 2017 (pris en compte dans la v0.7)
 
 Log
 ^^^

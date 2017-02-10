@@ -33,12 +33,21 @@ txtquota =["Bonjour, tu es prof principal de la ",
 *vider la corbeille* même si elle semble vide.
 Bien cordialement,"""]
 
-# lignes de texte pour envoi d'identifiant de nouveaux élèves.
+# lignes de texte pour envoi d'identifiant de nouveaux élèves - ENT
 txtidnew= ["Bonjour, tu es prof principal de la ",
            "Les nouveaux élèves suivants sont arrivés dans ta classe:\n",
 """Merci de leur transmettre leur identifiant + mot de passe (ENT). 
 Bien cordialement,""",
            "Voici les identifiants des nouveaux tuteurs dans ta classe.\nBien cordialemnt,"]
+
+# lignes de texte pour envoi d'identifiant de nouveaux élèves - réseau pédagogique
+txtidrezonew= ["Bonjour, tu es prof principal de la ",
+               "Les nouveaux \xE9l\xE8ves suivants sont arrivés dans ta classe:\n",
+"""Merci de leur transmettre leur identifiant + mot de passe provisoire du ré-
+seau pédagogique. 
+Il faut mettre des lettres (dont majuscule) et des chiffres pour le nouveau
+mot de passe.
+Bien cordialement,"""]
 
 # lignes de texte du message pour diffusion générale des id et mdp
 txtidgen = ["Bonjour, tu es prof principal de la ",

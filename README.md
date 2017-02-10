@@ -12,13 +12,15 @@ documents odt pour les parents:
 
  - dépassement de quota des élèves sur le serveur scribe
  - identifiants ENT elycee
-
+ - identifiants Atos réseau pédagogique
+ 
 Il s'appuie sur des extractions au format CSV:
  - listes des profs principaux + email par classe (ex: export pronote)
  - copie du listing scribe des dépassements de quota et mise en CSV
  - fichier général des identifiants ENT elycee ou fichier des nouveaux
    identifiants.
-
+ - fichiers des identifiants générés par Atos sur réseau pédagogique
+ 
 dépendances python:
 odfpy, pyyaml
 
@@ -51,7 +53,7 @@ d'inquiétude.
 Lancement
 =========
 
-En ligne de commande depuis n'impote où::
+En ligne de commande depuis n'importe où::
 
   run_refnumtool.bat
 

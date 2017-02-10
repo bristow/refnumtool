@@ -1,6 +1,10 @@
 Historique
 ==========
 
+* 0.7: ajout d'une génération des identifiants réseau élèves (Atos) par classe.
+  bug fix: adaptation au séparateur de champs dans les csv atos.
+* 0.6: ajout d'un envoi des nouveaux identifiants élèves réseau aux PP.
+  Rationnalisation initialisation des fichiers de config.
 * 0.5: bug fix sur les traitements csv; filtrage des comptes tuteurs qui sont
   déjà utilisés.
 * 0.4: ajout d'un envoi global des identifiants tuteurs aux profs principaux.
