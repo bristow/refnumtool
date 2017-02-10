@@ -46,4 +46,5 @@ Table des matières:
 
    install.rst
    history.rst
+   customize.rst
    api.rst

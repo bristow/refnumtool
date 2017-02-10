@@ -47,19 +47,14 @@ class Mailing():
         self._update_config(("initialdir", initdir))
 
         home = expanduser("~/.refnumtool.d")
-        # texte des quotas
-        confquota = join(home,"textquota.yaml") 
-        with open(confquota,"r") as conf_file:
-            self.textquota = load(conf_file, Loader=Loader)
-        # texte des newid
-        confidnew = join(home,"textidnew.yaml") 
-        with open(confidnew,"r") as conf_file:
-            self.textidnew = load(conf_file, Loader=Loader)
-        # texte des idgen
-        confidgen = join(home,"textidgen.yaml") 
-        with open(confidgen,"r") as conf_file:
-            self.textidgen = load(conf_file, Loader=Loader)
-
+        ATTRIB = {'textquota': join(home,"textquota.yaml"),
+                  'textidnew': join(home,"textidnew.yaml"),
+                  'textidrezonew': join(home,"textidrezonew.yaml") ,
+                  'textidgen': join(home,"textidgen.yaml")}
+        for k,v in ATTRIB.items():
+            with open(v,"r") as conf_file:
+                setattr(self, k, load(conf_file, Loader=Loader))
+            
         self.pathprof = askopenfilename(initialdir=self.config["initialdir"],\
                                         defaultextension=".csv",\
                                         title="Fichier des profs principaux",\
@@ -88,10 +83,10 @@ class Mailing():
     def _set_prof(self, choix):
         """charge les données prof
 
-        :param choix: in ["elycee", "quota"]
+        :param choix: in ["elycee", "quota", "atos"]
         """
         #nom de l'entrée csv
-        ext = (choix if choix=="elycee" else "scribe")
+        ext = (choix if choix in ["elycee", "atos"] else "scribe")
         # remplissage profs
         fprof=open(self.pathprof, encoding="utf8")
         dialect=csv.Sniffer().sniff(fprof.readline())
@@ -158,6 +153,35 @@ class Mailing():
                    self.PP[e["classe"]][p].append(e)
         fid.close()
 
+    def admin_idrezonew(self):
+        """lancer l'analyse des nouveaux identifiants réseau péda (atos): rempli les
+        dictionnaires self.PP avec une clé 'Eleve' liste des nouveaux élèves.
+
+        """
+        self._set_pathid(invite="Fichier des *nv identifiants - réseau péda.*")
+        self._set_prof("atos")
+
+        # remplissage élèves
+        fid = open(self.pathid, "r", encoding="utf-16")
+        self.nbel = 0 #nb élèves
+        LIGNE = fid.readline()
+        while LIGNE:
+            TYPE, prenom, nom, login,classe, mdp = LIGNE.split(";")
+            mdp = mdp[:-1] #enlever le \n final
+            if TYPE == "Eleve": # il peut aussi être PersEducNat
+                self.nbel +=1
+                if TYPE not in self.PP[classe]:
+                    self.PP[classe][TYPE] =[{'prenom':prenom, 'nom': nom,\
+                                                  'login':login, 'mdp':mdp}]
+                else:
+                   self.PP[classe][TYPE].append({'prenom':prenom,\
+                                                      'nom': nom,\
+                                                      'login':login,\
+                                                      'mdp':mdp})
+            LIGNE = fid.readline()
+        fid.close()
+
+        
     def admin_idgen(self):
         """génération des fichiers d'identifiants par classe.
         """
@@ -183,7 +207,7 @@ class Mailing():
         """fonction de mailing aux profs principaux
         les paramètres sont lus dans self.config importé de refnumtool.
 
-        :param cible: in ["quota", "idgen", "idnew", "idgentu"]
+        :param cible: in ["quota", "idgen", "idnew", "idgentu", "idrezonew]
         :type cible: str
         :param test: indique si on simule le mailing auquel cas, l'adresse de\
         sortie est default_to
@@ -198,7 +222,6 @@ class Mailing():
         :type smtp: str
         :param port: port value for the relay 587 for secured transaction.
         :type port: int
-
 
         """
 
@@ -266,21 +289,21 @@ class Mailing():
 
                 M = MIMEText(msg, _charset='utf-8')
                 M['Subject'] = str(n)+' élève'+("s" if n>=2 else "") +\
-                               " en "+E["elycee"]
+                               " en "+E["elycee"]+" - identifiants ENT"
                 M['From'] = cfg["sender"]
                 M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
                 try:
                     COUNTPP += 1
                     s.send_message(M)
-                    print("1 msg (élèves) à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
+                    print("1 msg (élèves-ENT) à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
                           file=LOG)
                 except: # catch all exceptions
                     print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +\
                           M['To'], file=LOG)
             print(COUNT, "nouveaux élèves", file=LOG)
-            print(str(COUNTPP)+" profs contactés (élèves)", file=LOG)
+            print(str(COUNTPP)+" profs contactés (élèves-ENT)", file=LOG)
             print(COUNT, "nouveaux élèves")
-            print(str(COUNTPP)+" profs contactés (élèves)")
+            print(str(COUNTPP)+" profs contactés (élèves-ENT)")
 
             pptu = [v for v in self.PP.values() if "Tuteur" in v]
             COUNT = 0
@@ -295,7 +318,7 @@ class Mailing():
                 msg += "\n"+cfg["sig"]
                 M = MIMEMultipart()
                 M['Subject'] = str(n)+' tuteur'+("s" if n>=2 else "") +\
-                               " en "+E["elycee"]
+                               " en "+E["elycee"]+" - identifiants ENT"
                 M['From'] = cfg["sender"]
                 M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
                 M.attach(MIMEText(msg, 'plain', _charset='utf-8'))                
@@ -318,9 +341,45 @@ class Mailing():
                     print("Erreur (tuteurs): "+E["Nom"]+" " +E["Prénom"]+ " - " +\
                           M['To'], file=LOG)
             print(COUNT, "nouveaux tuteurs", file=LOG)
-            print(str(COUNTPP)+" profs contactés (tuteurs)", file=LOG)
+            print(str(COUNTPP)+" profs contactés (tuteurs-ENT)", file=LOG)
             print(COUNT, "nouveaux tuteurs")
-            print(str(COUNTPP)+" profs contactés (tuteurs)")
+            print(str(COUNTPP)+" profs contactés (tuteurs-ENT)")
+
+        elif cible == "idrezonew":
+            pathid = dirname(self.pathid)
+            # filtrer seulement les élèves pour les pp?
+            pp = [v for v in self.PP.values() if "Eleve" in v]
+            COUNT = 0
+            COUNTPP = 0
+            for E in pp:
+                n = len(E["Eleve"]) # nb nv élèves
+                COUNT += n
+                msg = self.textidrezonew[0]+E["atos"]+".\n"
+                msg += self.textidrezonew[1]
+                for x in E["Eleve"]:
+                    msg+= x["nom"]+ " " +x["prenom"]+ " : "+x["login"] +" -- "+x["mdp"]+"\n\n"
+                msg += self.textidrezonew[2]
+                msg += cfg["sig"]
+
+                M = MIMEText(msg, _charset='utf-8')
+                M['Subject'] = str(n)+' élève'+("s" if n>=2 else "") +\
+                               " en "+E["atos"] + " - identifiants réseau lycée"
+                M['From'] = cfg["sender"]
+                M['To'] = (cfg["default_to"] if cfg["test"] else E["E-mail"])
+                try:
+                    COUNTPP += 1
+                    s.send_message(M)
+                    print("1 msg (élèves-r.péda) à "+E["Nom"]+" " +E["Prénom"]+ " - " + M['To'],
+                          file=LOG)
+                except: # catch all exceptions
+                    print("Erreur: "+E["Nom"]+" " +E["Prénom"]+ " - " +\
+                          M['To'], file=LOG)
+            print(COUNT, "nouveaux élèves", file=LOG)
+            print(str(COUNTPP)+" profs contactés (élèves-réseau péda)", file=LOG)
+            print(COUNT, "nouveaux élèves")
+            print(str(COUNTPP)+" profs contactés (élèves-réseau péda)")
+
+
 
         elif cible == "idgen":
             pathid = self.pathid

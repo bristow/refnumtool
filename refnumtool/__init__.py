@@ -23,15 +23,17 @@ class refnumTool(tk.Frame):
     * un csv des profs principaux
     * un csv des overquotas
     * un csv des identifiants ENT (général ou juste une màj)
+    * un csv des identifiants réseau péda. (export ATOS dans PASSWORDS)
     
-    1. envoi de messages aux profs principaux pour les dépassements de quota
+    1. envoi de messages aux profs principaux pour les dépassements de quota (scribe)
     2. génération d'un document .odt par classe des identifiants ENT pour les
-       tuteurs sur une mise à jour, envoi des identifiants élèves aux PP.
+       tuteurs sur une mise à jour, envoi des identifiants élèves aux PP (elycee)
     3. génération globale des identifiants ENT tuteurs et élèves par classe
-       les comptes tuteurs déjà utilisés sont expurgés
-    4. envoi général des id élèves aux PP.
-    5. envoi général des id tuteurs aux PP.
-    6. quitter
+       les comptes tuteurs déjà utilisés sont expurgés (elycee)
+    4. envoi général des id élèves aux PP (elycee)
+    5. envoi général des id tuteurs aux PP (elycee)
+    6. envoi des nouveaux identifiants réseau élèves aux PP (atos)
+    7. quitter
 
     """
     global Dumper
@@ -42,59 +44,45 @@ class refnumTool(tk.Frame):
         self.grid()         
         # paramètres généraux
         home = expanduser("~/.refnumtool.d")
-        confpath = join(home,"config.yaml") 
-        if not(exists(confpath)):
-            print("création "+confpath)
-            self.init_config(param.config, confpath)
-            #copyfile("refnumtool/configbase.yaml", confpath) 
+        #creation des fichiers de config si ils n'existent pas.
+        ConfFiles=[("config.yaml",param.config),
+                   ("text_extract_tuteur.yaml",param.extract_tuteur),
+                   ("textquota.yaml",param.txtquota),
+                   ("textidnew.yaml",param.txtidnew),
+                   ("textidrezonew.yaml",param.txtidrezonew),
+                   ("textidgen.yaml",param.txtidgen)]
+        for e in ConfFiles:
+            PATH = join(home,e[0]) # chemin complet vers fichier de conf
+            if not(exists(PATH)):
+                print("création "+PATH)
+                self.init_config(e[1], PATH)
+                
+        # chargement des paramètres généraux
+        confpath = join(home,"config.yaml")
         with open(confpath,"r") as conf_file:
             self.config = load(conf_file, Loader=Loader)
-        # texte de l'export odt tuteur
-        txttuteurpath = join(home, "text_extract_tuteur.yaml")
-        if not(exists(txttuteurpath)):
-            print("création "+txttuteurpath)
-            self.init_config(param.extract_tuteur, txttuteurpath)
-            #copyfile("refnumtool/text_extract_tuteur.yaml", txttuteurpath)
-        # texte des quotas
-        confquota = join(home,"textquota.yaml") 
-        if not(exists(confquota)):
-            print("création "+confquota)
-            self.init_config(param.txtquota, confquota)
-            #copyfile("refnumtool/textquota.yaml", confquota) 
-        # texte des newid
-        confidnew = join(home,"textidnew.yaml") 
-        if not(exists(confidnew)):
-            print("création "+confidnew)
-            self.init_config(param.txtidnew, confidnew)
-            #copyfile("refnumtool/textidnew.yaml", confidnew) 
-        # texte des idgen
-        confidgen = join(home,"textidgen.yaml") 
-        if not(exists(confidgen)):
-            print("création "+confidgen)
-            self.init_config(param.txtidgen, confidgen)
-            #copyfile("refnumtool/textidgen.yaml", confidgen) 
-
-
         print("chargement du fichier des professeurs principaux")    
         self.mailing  = Mailing(self.config)
         self.options = {'1': self._quota, '2': self._idnew,\
                         '3': self.mailing.admin_idgen, '4': self._idgen,
-                        '5': self._idgentu, '6': self._exit}
+                        '5': self._idgentu, '6': self._idrezonew,
+                        '7': self._exit}
 
         self.__call__()
         
     def __call__(self):
-        choix = ["1: envoi des overquotas aux pp",
-                 "2: génération d'un .odt tuteurs, envoi des nouveaux id ENT aux pp",
-                 "3: génération de tous les id ENT par classe",
-                 "4: envoi des id élèves aux PP",
-                 "5: envoi des id tuteurs aux PP",
-                 "6: quitter"]
+        choix = ["1: envoi des overquotas aux pp (scribe)",
+                 "2: génération d'un .odt tuteurs, envoi des nouveaux id aux pp (elycee)",
+                 "3: génération de tous les id ENT par classe (elycee)",
+                 "4: envoi des id élèves globaux aux PP (elycee)",
+                 "5: envoi des id tuteurs globaux aux PP (elycee)",
+                 "6: envoi des nouveaux id réseau péda. aux pp (atos)",
+                 "7: quitter"]
         
         print(*choix, sep='\n')
-        IN = input("choisir 1,2,3,4,5,6 :")
-        while IN not in "123456":
-            IN = input("choisir 1,2,3,4,5,6 :")
+        IN = input("choisir 1,2,3,4,5,6,7 :")
+        while IN not in "1234567":
+            IN = input("choisir 1,2,3,4,5,6,7 :")
         self.options[IN]()
 
     def init_config(self, val, path):
@@ -139,6 +127,17 @@ class refnumTool(tk.Frame):
             self.mailing._save_config()
             self.__call__()
 
+    def _idrezonew(self):
+        self.mailing.admin_idrezonew()
+        pp = [e for e in self.mailing.PP.values() if "Eleve" in e]
+        print(len(pp), " profs à contacter pour élèves - nv id réseau péda.")
+        a = input("poursuivre?(o/n) ")
+        if a == 'o':
+            self.mailing.mailing("idrezonew")
+        else:
+            self.mailing._save_config()
+            self.__call__()
+            
     def _idgen(self):
         self.mailing._set_iddirectory("dossier des identifiants")
         self.mailing._set_prof("elycee")
