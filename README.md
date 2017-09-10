@@ -44,6 +44,7 @@ Pour windows::
 
 Pour linux::
 
+  Dépendances Python3 : sudo apt install python3-pip python3-tk
   sudo pip3 install odfpy pyyaml /chemin/vers/refnumtool-xxx-py3-none-any.whl
 
 Il peut y avoir des messages de warning pour l'installation de pyyaml du fait
